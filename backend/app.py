@@ -135,6 +135,42 @@ def delete_user(user_id):
 #   Exercise2
 # - POST /predict_house_price
 
+@app.route("/predict_house_price", methods = ["POST"])
+def predict_house_price():
+    data = request.get_json(silent=True) or {}
+
+    try:
+        sample_df = pd.DataFrame([{
+            "city": data["city"],
+            "province": data["province"],
+            "latitude": float(data["latitude"]),
+            "longitude": float(data["longitude"]),
+            "lease_term": data["lease_term"],
+            "type": data["type"],
+            "beds": float(data["beds"]),
+            "baths": float(data["baths"]),
+            "sq_feet": float(data["sq_feet"]),
+            "furnishing": data["furnishing"],
+            "smoking": data["smoking"],
+            "cats": bool(data.get("pets", False)),
+            "dogs": bool(data.get("pets", False)),
+        }], columns=PREDICTION_COLUMNS)
+    except KeyError as error:
+        return jsonify({"message": f"Missing required field: {error.args[0]}."}), 400
+    except (TypeError, ValueError):
+        return jsonify({
+            "message": "latitude, longitude, beds, baths, and sq_feet must be numbers."
+        }), 400
+
+    try:
+        model = joblib.load(MODEL_PATH)
+        predicted_price = float(model.predict(sample_df)[0])
+    except Exception as error:
+        return jsonify({"message": str(error)}), 400
+
+    return jsonify({"predicted_price": predicted_price}), 200
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5050)

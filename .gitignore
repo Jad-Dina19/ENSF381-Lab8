@@ -3,4 +3,4 @@ backend/src/random_forest_model
 venv/
 __pycache__/
 *.pyc
-backend/src/random_forest_model.pkl
+*.pkl
