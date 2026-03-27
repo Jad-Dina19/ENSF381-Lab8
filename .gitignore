@@ -1,0 +1,6 @@
+backend/src/random_forest_model
+.venv/
+venv/
+__pycache__/
+*.pyc
+backend/src/random_forest_model.pkl
