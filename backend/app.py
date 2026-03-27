@@ -58,12 +58,12 @@ users = deepcopy(SEEDED_USERS)
 #   Exercise2
 # - POST /predict_house_price
 
-# get_user
+# get_user_ex1
 @app.route("/users", methods=["GET"])
 def get_user():
     return jsonify(list(users.values())), 200
 
-# post_user
+# post_user_ex1
 @app.route("/users", methods=["POST"])
 def post_user():
     json_data = request.get_json()
@@ -80,7 +80,7 @@ def post_user():
     users[user_id] = json_data
     return jsonify(json_data), 201
 
-# put_user
+# put_user_ex1
 @app.route("/users/<user_id>", methods=["PUT"])
 def put_user(user_id):
     user = request.get_json()
@@ -100,7 +100,7 @@ def put_user(user_id):
     }
     return jsonify(json_data), 200
 
-# delete_user
+# delete_user_ex1
 @app.route("/users/<user_id>", methods=["DELETE"])
 def delete_user(user_id):
     if user_id not in users:
@@ -109,6 +109,44 @@ def delete_user(user_id):
     del users[user_id]
     return jsonify({"message": f"Deleted user {user_id}"}), 200
 
+##########################################################################
+
+# post_predict_ex2
+@app.route("/predict_house_price", methods=["POST"])
+def predict_house_price():
+    model = joblib.load(MODEL_PATH)
+    data = request.get_json()
+    pets_allowed = bool(data.get('pets_allowed', False))
+
+    if not data:
+        return jsonify({"message": "Invalid input"}), 400
+
+    cats = pets_allowed
+    dogs = pets_allowed
+
+    sample_data = [
+    data['city'],
+    data['province'],
+    float(data['latitude']),
+    float(data['longitude']),
+    data['lease_term'],
+    data['type'],
+    float(data['beds']),
+    float(data['baths']),
+    float(data['sq_feet']),
+    data['furnishing'],
+    data['smoking'],
+    cats,
+    dogs,
+    ]
+    sample_df = pd.DataFrame([sample_data], columns=[
+        'city', 'province', 'latitude', 'longitude', 'lease_term',
+        'type', 'beds', 'baths', 'sq_feet', 'furnishing',
+        'smoking', 'cats', 'dogs'
+    ])
+    predicted_price = model.predict(sample_df)[0]
+
+    return jsonify({"predicted_price": float(predicted_price)}), 200
+
 if __name__ == "__main__":
     app.run(debug=True, port=5050)
-
