@@ -21,3 +21,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# virtual environment
+.venv/
+
+# /backend/random_forest_model.pkl

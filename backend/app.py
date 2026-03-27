@@ -58,6 +58,57 @@ users = deepcopy(SEEDED_USERS)
 #   Exercise2
 # - POST /predict_house_price
 
+# get_user
+@app.route("/users", methods=["GET"])
+def get_user():
+    return jsonify(list(users.values())), 200
+
+# post_user
+@app.route("/users", methods=["POST"])
+def post_user():
+    json_data = request.get_json()
+    if not json_data:
+        return jsonify({"message": "Invalid input"}), 400
+
+    user_id = json_data.get("id")
+    if not user_id:
+        return jsonify({"message": "User ID is required"}), 400
+
+    if user_id in users:
+        return jsonify({"message": f"User {user_id} already exists"}), 409
+
+    users[user_id] = json_data
+    return jsonify(json_data), 201
+
+# put_user
+@app.route("/users/<user_id>", methods=["PUT"])
+def put_user(user_id):
+    user = request.get_json()
+    user_name = user.get("first_name")
+    user_group = user.get("user_group")
+
+    if user_id not in users:
+        return jsonify({"message": f"User {user_id} not found"}), 404
+
+    if not user_name or not user_group:
+        return jsonify({"message": "Invalid input"}), 400
+
+    users[user_id] = {
+        "id": user_id,
+        "first_name": user_name,
+        "user_group": user_group,
+    }
+    return jsonify(json_data), 200
+
+# delete_user
+@app.route("/users/<user_id>", methods=["DELETE"])
+def delete_user(user_id):
+    if user_id not in users:
+        return jsonify({"message": f"User {user_id } not found"}), 404
+
+    del users[user_id]
+    return jsonify({"message": f"Deleted user {user_id}"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True, port=5050)
+
